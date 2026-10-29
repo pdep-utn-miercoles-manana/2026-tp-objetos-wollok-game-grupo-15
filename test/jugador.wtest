@@ -1,0 +1,58 @@
+import src.personajeComportamiento.*
+import src.comidasComportamiento.*
+
+describe "Test de movimiento jugador" {
+
+  test "El jugador se mueve hacia arriba" {
+    jugador.position(game.at(8, 1))
+    jugador.arriba()
+    assert.equals(game.at(8, 2), jugador.position())
+  }
+  test "El jugador se mueve hacia abajo" {
+    jugador.position(game.at(8, 1))
+    jugador.abajo()
+    assert.equals(game.at(8, 0), jugador.position())
+  }
+
+  test "El jugador se mueve hacia la derecha" {
+    jugador.position(game.at(8, 1))
+    jugador.derecha()
+    assert.equals(game.at(9, 1), jugador.position())
+  }
+
+  test "El jugador se mueve hacia la izquierda" {
+    jugador.position(game.at(8, 1))
+    jugador.izquierda()
+    assert.equals(game.at(7, 1), jugador.position())
+  }
+}
+
+
+describe "Test de Interacción con objetos" {
+
+  test "El jugador no puede agarrar comida si no esta lista" {
+    jugador.position(game.at(5, 1))
+    const carne = new Comida
+    (
+      position = game.at(5, 0), 
+      tiempoCoccion = 5, 
+      precio = 10, 
+      image = "carne.png"
+      )
+    jugador.agarrarComida(carne)
+    assert.that(jugador.inventarioComidas().isEmpty())
+  }
+
+  test "El jugador agarra la comida cuando el tiempo es 0" {
+    jugador.position(game.at(5, 1))
+    const carneLista = new Comida(
+      position = game.at(5, 0), 
+      tiempoCoccion = 0, 
+      precio = 10, 
+      image = "carne.png"
+      )
+    jugador.agarrarComida(carneLista)
+    assert.equals(1, jugador.inventarioComidas().size())
+  }
+
+}

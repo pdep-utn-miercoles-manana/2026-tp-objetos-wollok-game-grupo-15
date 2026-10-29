@@ -1,0 +1,9 @@
+{
+    "name": "restorante",
+    "version": "1.0.0",
+    "resourceFolder": "assets",
+  "wollokVersion": "4.2.3",
+    "author": "Nahuel",
+    "license": "ISC"
+  }
+  

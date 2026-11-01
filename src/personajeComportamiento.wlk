@@ -24,11 +24,9 @@ object jugador {
     }
 
     method agarrar() {
-        const comidaEncontrada = comidas.listaComidas().filter({ c => c.position() == self.position().down(1) })
-        
-        if (comidaEncontrada != null) {
-            self.agarrarComida(comidaEncontrada.first())
-        }
+         comidas.listaComidas()
+        .filter({ c => c.position() == self.position().down(1) })
+        .forEach({ c => self.agarrarComida(c) })
     }   
 
     method agarrarComida(comida) {
@@ -39,7 +37,9 @@ object jugador {
             inventarioComidas.add(copia)
             game.addVisual(copia)
         }
+
     }
+
     
     method iniciar() {
         game.addVisual(self)
@@ -51,5 +51,28 @@ object jugador {
         
         keyboard.space().onPressDo({ self.agarrar() })
     }
+    method entregar(mesa) {
+    if (inventarioComidas.any({ c => mesa.quiere(c) })) {
+        const comida = inventarioComidas.find({ c => mesa.quiere(c) })
+        self.cobrar(mesa, comida)
+    }
+    }
+
+    method cobrar(mesa, comida) {
+        monedas += mesa.servir(comida)
+        inventarioComidas.remove(comida)
+        game.removeVisual(comida)
+        self.reacomodarInventario()
+    }
+
+// al sacar una comida, las que quedan se corren para no dejar huecos
+    method reacomodarInventario() {
+        inventarioComidas.forEach({ c => c.position(game.at(20 + inventarioComidas.indexOf(c), 4)) })
+    }
 
 }
+object cartelMonedas {
+    const property position = game.at(22, 14)
+    method text() = "Monedas: " + jugador.monedas().toString()
+    method textColor() = "FFFFFF"
+    }

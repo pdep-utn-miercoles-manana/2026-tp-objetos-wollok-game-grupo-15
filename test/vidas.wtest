@@ -1,0 +1,24 @@
+import src.vidasComportamiento.*
+
+describe "Vidas" {
+
+    test "perder una vida baja la cantidad en uno" {
+        const antes = vidas.cantidad()
+        vidas.perder()
+        assert.equals(antes - 1, vidas.cantidad())
+    }
+
+    test "las vidas no bajan de cero" {
+        (vidas.cantidad() + 2).times({ i => vidas.perder() })
+        assert.equals(0, vidas.cantidad())
+    }
+
+    test "al perder todas las vidas están agotadas" {
+        vidas.cantidad().times({ i => vidas.perder() })
+        assert.that(vidas.agotadas())
+    }
+
+    test "con vidas restantes no están agotadas" {
+        assert.notThat(vidas.agotadas())
+    }
+}

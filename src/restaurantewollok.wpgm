@@ -2,18 +2,19 @@ import wollok.game.*
 import src.restauranteEntorno.*
 import src.personajeComportamiento.*
 import src.menuPartida.*
-
+import src.vidasComportamiento.*
 program juego {
     game.title("Restorante")
     game.width(26)
-    game.height(16)   
+    game.height(16)
     game.cellSize(50)
     game.boardGround("piso2.png")
 
-    jugador.iniciar()
     restaurante.iniciar()
     menu.iniciar()
-
+    game.addVisual(vidas)
+    game.addVisual(cartelMonedas)
+    jugador.iniciar()
 
     game.start()
 }

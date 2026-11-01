@@ -1,0 +1,81 @@
+import src.estadosEspera.*
+import src.clienteComportamiento.*
+import src.restauranteEntorno.*
+import src.personajeComportamiento.*
+import src.comidasComportamiento.*
+
+describe "Entregar pedidos" {
+    const mesa = new Mesa(position = game.at(3, 4))
+    const cliente = new Cliente(pedido = new Pedido(comidaPedida = carne))
+
+    method initialize() {
+        jugador.inventarioComidas().clear()
+        mesa.sentar(cliente)
+    }
+
+    method darAlJugador(comida) {
+        game.addVisual(comida)
+        jugador.inventarioComidas().add(comida)
+    }
+
+    test "entregar lo que pidió suma la propina a las monedas" {
+        self.darAlJugador(carne.copiarEn(game.at(20, 4)))
+        const antes = jugador.monedas()
+        jugador.entregar(mesa)
+        assert.equals(antes + verde.propina(), jugador.monedas())
+    }
+
+    test "entregar saca la comida del inventario y libera la mesa" {
+        self.darAlJugador(carne.copiarEn(game.at(20, 4)))
+        jugador.entregar(mesa)
+        assert.equals(0, jugador.inventarioComidas().size())
+        assert.notThat(mesa.ocupada())
+    }
+
+    test "si no tiene lo que pidió, no pasa nada" {
+        self.darAlJugador(cerdo.copiarEn(game.at(20, 4)))
+        const antes = jugador.monedas()
+        jugador.entregar(mesa)
+        assert.equals(antes, jugador.monedas())
+        assert.equals(1, jugador.inventarioComidas().size())
+        assert.that(mesa.ocupada())
+    }
+
+    test "con el inventario vacío no pasa nada" {
+        jugador.entregar(mesa)
+        assert.that(mesa.ocupada())
+    }
+
+    test "la propina depende de cuánto esperó el cliente" {
+        self.darAlJugador(carne.copiarEn(game.at(20, 4)))
+        cliente.esperar()
+        const antes = jugador.monedas()
+        jugador.entregar(mesa)
+        assert.equals(antes + amarillo.propina(), jugador.monedas())
+    }
+}
+
+describe "Mesa cercana al jugador" {
+    const mesa = new Mesa(position = game.at(3, 4))
+
+    test "a la izquierda de la mesa está cerca" {
+        assert.that(mesa.estaCerca(game.at(2, 4)))
+    }
+
+    test "debajo de la mesa está cerca" {
+        assert.that(mesa.estaCerca(game.at(4, 3)))
+    }
+
+    test "a la derecha de la mesa está cerca" {
+        assert.that(mesa.estaCerca(game.at(6, 5)))
+    }
+
+    test "arriba de la mesa está cerca" {
+        assert.that(mesa.estaCerca(game.at(5, 6)))
+    }
+
+    test "lejos de la mesa no está cerca" {
+        assert.notThat(mesa.estaCerca(game.at(8, 1)))
+        assert.notThat(mesa.estaCerca(game.at(1, 4)))
+    }
+}

@@ -2,47 +2,62 @@ import src.comidasComportamiento.*
 import src.vidasComportamiento.*
 import src.personajeComportamiento.*
 import src.clienteComportamiento.*
+import src.visualesSalon.*
 
 class Mesa {
     var property position
-    var cliente = null
+    var grupo = null
+
+    method capacidad() = 4
 
     method image() = "mesaGrande.png"
 
-    method cliente() = cliente
+    method grupo() = grupo
 
-    method ocupada() = cliente != null
+    method ocupada() = grupo != null
 
-    method sentar(nuevoCliente) {
+    method hayPersona(indice) = self.ocupada() && indice < grupo.cantidadPendiente()
+
+    method imagenComensal(indice) = if (self.hayPersona(indice)) grupo.imagenComensal() else "vacio.png"
+
+    method imagenPedido(indice) = if (self.hayPersona(indice)) grupo.pedidos().get(indice).comidaPedida().image() else "vacio.png"
+
+    method sentar(nuevoGrupo) {
         if (self.ocupada()) {
             throw new DomainException(message = "La mesa ya está ocupada")
         }
-        cliente = nuevoCliente
+        if (nuevoGrupo.cantidadPendiente() > self.capacidad()) {
+            throw new DomainException(message = "No entran tantas personas en la mesa")
+        }
+        grupo = nuevoGrupo
     }
 
     method liberar() {
-        cliente = null
+        grupo = null
     }
 
     method esperar() {
         if (self.ocupada()) {
-            cliente.esperar()
+            grupo.esperar()
         }
     }
 
-    method clienteSeFue() = self.ocupada() && cliente.seVa()
+    method grupoSeFue() = self.ocupada() && grupo.seVa()
+
+    method quiere(comida) = self.ocupada() && grupo.quiere(comida)
 
     method servir(comida) {
         if (!self.ocupada()) {
             throw new DomainException(message = "No hay nadie en la mesa")
         }
-        const propina = cliente.atender(comida)
-        self.liberar()
+        const propina = grupo.atender(comida)
+        if (grupo.atendido()) {
+            self.liberar()
+        }
         return propina
     }
-    method quiere(comida) = self.ocupada() && cliente.quiere(comida)
 
-// la mesa ocupa 3x2 celdas desde su posición; "cerca" es esa zona más un borde de una celda
+    // la mesa ocupa 3x2 celdas desde su posición; "cerca" es esa zona más un borde de una celda
     method estaCerca(posicion) =
         posicion.x().between(position.x() - 1, position.x() + 3) &&
         posicion.y().between(position.y() - 1, position.y() + 2)
@@ -55,12 +70,14 @@ class Cocina {
 
 object restaurante {
     const property mesas = []
+    const intervaloLlegada = 10000   // llega un grupo cada 8 segundos
+    const intervaloEspera = 10000    // cada 8 segundos la paciencia baja un color
 
     method iniciar() {
-        self.agregarMesa(3, 11)
-        self.agregarMesa(3, 4)
-        self.agregarMesa(12, 11)
-        self.agregarMesa(12, 4)
+        self.agregarMesa(3, 11, 19, 12)
+        self.agregarMesa(3, 4, 19, 8)
+        self.agregarMesa(12, 11, 23, 12)
+        self.agregarMesa(12, 4, 23, 8)
 
         //cocinas
         game.addVisual(new Cocina(position = game.at(7, 0)))
@@ -73,11 +90,41 @@ object restaurante {
         game.addVisual(pollo)
         game.addVisual(manzanaDorada)
         keyboard.e().onPressDo({ self.entregar() })
+        game.onTick(intervaloLlegada, "llegadaClientes", { self.llegadaClientes() })
+        game.onTick(intervaloEspera, "esperaClientes", { self.pasarEspera() })
     }
     method entregar() {
         mesas
             .filter({ m => m.estaCerca(jugador.position()) })
             .forEach({ m => jugador.entregar(m) })
+    }
+
+    method nuevoGrupo() {
+    const cantidad = [1, 2, 2, 3].anyOne()
+    const pedidos = (1..cantidad).map({ i =>
+        new Pedido(comidaPedida = comidas.anyOne())
+    })
+    return new Grupo(pedidos = pedidos)
+    }
+
+    method llegadaClientes() {
+    const libres = mesas.filter({ m => !m.ocupada() })
+    if (!libres.isEmpty()) {
+        const mesa = libres.anyOne()
+        const grupo = self.nuevoGrupo()
+        mesa.sentar(grupo)
+        console.println("Grupo de " + grupo.cantidadPendiente().toString() + " en " + mesa.position().toString())
+    }
+    }
+
+    method pasarEspera() {
+    mesas.forEach({ m =>
+        m.esperar()
+        if (m.grupoSeFue()) {
+            m.liberar()
+            self.perderVida()
+        }
+        })
     }
 
     
@@ -90,10 +137,21 @@ object restaurante {
         }
     }
 
-    // (x, y) es la celda de abajo a la izquierda de la mesa
-    method agregarMesa(x, y) {
+    // (x, y) es la celda de abajo a la izquierda de la mesa.
+    // (xPanel, yPanel) es la celda de abajo a la izquierda de su ventana en el panel.
+    method agregarMesa(x, y, xPanel, yPanel) {
         const mesa = new Mesa(position = game.at(x, y))
         mesas.add(mesa)
         game.addVisual(mesa)
+
+        self.agregarVisuales(self.cuatroCeldas(x, y, 2), { i, p => new Comensal(mesa = mesa, indice = i, position = p) })
+        self.agregarVisuales(self.cuatroCeldas(xPanel, yPanel, 1), { i, p => new CasilleroPedido(mesa = mesa, indice = i, position = p) })
     }
+    // Crea un visual por cada celda. "crear" recibe el número (0 a 3) y la posición.
+    method agregarVisuales(celdas, crear) {
+        (0..3).forEach({ i => game.addVisual(crear.apply(i, celdas.get(i))) })
+    }
+
+ // Cuatro celdas en rectángulo: arriba-izquierda, arriba-derecha, abajo-izquierda, abajo-derecha.
+    method cuatroCeldas(x, y, separacion) = [game.at(x, y + 1), game.at(x + separacion, y + 1), game.at(x, y), game.at(x + separacion, y)]
 }

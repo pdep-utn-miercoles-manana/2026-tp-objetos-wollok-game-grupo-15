@@ -1,0 +1,60 @@
+import src.estadosEspera.*
+import src.clienteComportamiento.*
+import src.restauranteEntorno.*
+import src.vidasComportamiento.*
+import src.comidasComportamiento.*
+
+describe "Llegada y espera de grupos" {
+    const mesa1 = new Mesa(position = game.at(3, 11))
+    const mesa2 = new Mesa(position = game.at(3, 4))
+
+    method initialize() {
+        restaurante.mesas().clear()
+        restaurante.mesas().add(mesa1)
+        restaurante.mesas().add(mesa2)
+    }
+
+    method mesasOcupadas() = restaurante.mesas().count({ m => m.ocupada() })
+
+    test "un grupo nuevo tiene entre una y cuatro personas" {
+        const grupo = restaurante.nuevoGrupo()
+        assert.that(grupo.cantidadPendiente().between(1, 4))
+    }
+
+    test "cada persona de un grupo nuevo pide una comida del menú" {
+    const grupo = restaurante.nuevoGrupo()
+    assert.that(grupo.pedidos().all({ p => comidas.contains(p.comidaPedida()) }))
+    }
+
+    test "cuando llega un grupo se sienta en una mesa libre" {
+        restaurante.llegadaClientes()
+        assert.equals(1, self.mesasOcupadas())
+    }
+
+    test "si todas las mesas están ocupadas, no llega nadie más" {
+        restaurante.llegadaClientes()
+        restaurante.llegadaClientes()
+        restaurante.llegadaClientes()
+        assert.equals(2, self.mesasOcupadas())
+    }
+
+    test "mientras no se canse, el grupo sigue en su mesa" {
+        restaurante.llegadaClientes()
+        2.times({ i => restaurante.pasarEspera() })
+        assert.equals(1, self.mesasOcupadas())
+    }
+
+    test "cuando el grupo se cansa de esperar, la mesa se libera y se pierde una vida" {
+        mesa1.sentar(restaurante.nuevoGrupo())
+        const vidasAntes = vidas.cantidad()
+        3.times({ i => restaurante.pasarEspera() })
+        assert.notThat(mesa1.ocupada())
+        assert.equals(vidasAntes - 1, vidas.cantidad())
+    }
+
+    test "una mesa libre no hace perder vidas" {
+        const vidasAntes = vidas.cantidad()
+        3.times({ i => restaurante.pasarEspera() })
+        assert.equals(vidasAntes, vidas.cantidad())
+    }
+}

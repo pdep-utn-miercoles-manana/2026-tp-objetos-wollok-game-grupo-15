@@ -69,7 +69,9 @@ object jugador {
 
 // al sacar una comida, las que quedan se corren para no dejar huecos
     method reacomodarInventario() {
-        inventarioComidas.forEach({ c => c.position(game.at(20 + inventarioComidas.indexOf(c), 4)) })
+        inventarioComidas.size().times({ n =>
+        inventarioComidas.get(n - 1).position(game.at(20 + n - 1, 4))
+        })
     }
 
     method upgrade(indiceElegido) {

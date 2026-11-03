@@ -6,11 +6,11 @@ import src.comidasComportamiento.*
 
 describe "Entregar pedidos" {
     const mesa = new Mesa(position = game.at(3, 4))
-    const cliente = new Cliente(pedido = new Pedido(comidaPedida = carne))
+    const grupo = new Grupo(pedidos = [new Pedido(comidaPedida = carne)])
 
     method initialize() {
         jugador.inventarioComidas().clear()
-        mesa.sentar(cliente)
+        mesa.sentar(grupo)
     }
 
     method darAlJugador(comida) {
@@ -18,21 +18,21 @@ describe "Entregar pedidos" {
         jugador.inventarioComidas().add(comida)
     }
 
-    test "entregar lo que pidió suma la propina a las monedas" {
+    test "entregar lo que pidieron suma la propina a las monedas" {
         self.darAlJugador(carne.copiarEn(game.at(20, 4)))
         const antes = jugador.monedas()
         jugador.entregar(mesa)
         assert.equals(antes + verde.propina(), jugador.monedas())
     }
 
-    test "entregar saca la comida del inventario y libera la mesa" {
+    test "entregar saca la comida del inventario y libera la mesa si era lo último" {
         self.darAlJugador(carne.copiarEn(game.at(20, 4)))
         jugador.entregar(mesa)
         assert.equals(0, jugador.inventarioComidas().size())
         assert.notThat(mesa.ocupada())
     }
 
-    test "si no tiene lo que pidió, no pasa nada" {
+    test "si no tiene lo que pidieron, no pasa nada" {
         self.darAlJugador(cerdo.copiarEn(game.at(20, 4)))
         const antes = jugador.monedas()
         jugador.entregar(mesa)
@@ -46,12 +46,21 @@ describe "Entregar pedidos" {
         assert.that(mesa.ocupada())
     }
 
-    test "la propina depende de cuánto esperó el cliente" {
+    test "la propina depende de cuánto esperó el grupo" {
         self.darAlJugador(carne.copiarEn(game.at(20, 4)))
-        cliente.esperar()
+        grupo.esperar()
         const antes = jugador.monedas()
         jugador.entregar(mesa)
         assert.equals(antes + amarillo.propina(), jugador.monedas())
+    }
+
+    test "si la mesa tiene dos pedidos, entregar uno no la libera" {
+        const otraMesa = new Mesa(position = game.at(12, 4))
+        otraMesa.sentar(new Grupo(pedidos = [new Pedido(comidaPedida = carne), new Pedido(comidaPedida = cerdo)]))
+        self.darAlJugador(carne.copiarEn(game.at(20, 4)))
+        jugador.entregar(otraMesa)
+        assert.that(otraMesa.ocupada())
+        assert.equals(0, jugador.inventarioComidas().size())
     }
 }
 

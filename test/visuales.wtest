@@ -1,0 +1,51 @@
+import src.estadosEspera.*
+import src.clienteComportamiento.*
+import src.restauranteEntorno.*
+import src.comidasComportamiento.*
+
+describe "Imágenes de una mesa" {
+    const mesa = new Mesa(position = game.at(3, 4))
+
+    method grupoDeDos() = new Grupo(pedidos = [new Pedido(comidaPedida = carne), new Pedido(comidaPedida = cerdo)])
+
+    test "una mesa libre no muestra comensales ni pedidos" {
+        assert.equals("vacio.png", mesa.imagenComensal(0))
+        assert.equals("vacio.png", mesa.imagenPedido(0))
+    }
+
+    test "un grupo de dos muestra dos comensales y dos pedidos" {
+        mesa.sentar(self.grupoDeDos())
+        assert.equals("cliente_verde.png", mesa.imagenComensal(0))
+        assert.equals("cliente_verde.png", mesa.imagenComensal(1))
+        assert.equals("vacio.png", mesa.imagenComensal(2))
+        assert.equals("carne.png", mesa.imagenPedido(0))
+        assert.equals("cerdo.png", mesa.imagenPedido(1))
+        assert.equals("vacio.png", mesa.imagenPedido(2))
+    }
+
+    test "el color de los comensales sigue la paciencia del grupo" {
+        mesa.sentar(self.grupoDeDos())
+        mesa.esperar()
+        assert.equals("cliente_amarillo.png", mesa.imagenComensal(0))
+        mesa.esperar()
+        assert.equals("cliente_naranja.png", mesa.imagenComensal(0))
+        mesa.esperar()
+        assert.equals("cliente_rojo.png", mesa.imagenComensal(0))
+    }
+
+    test "al servir un pedido desaparece ese comensal y ese pedido" {
+        mesa.sentar(self.grupoDeDos())
+        mesa.servir(carne.copiarEn(game.at(0, 0)))
+        assert.equals("cerdo.png", mesa.imagenPedido(0))
+        assert.equals("vacio.png", mesa.imagenPedido(1))
+        assert.equals("cliente_verde.png", mesa.imagenComensal(0))
+        assert.equals("vacio.png", mesa.imagenComensal(1))
+    }
+
+    test "al liberarse la mesa no se muestra nada" {
+        mesa.sentar(self.grupoDeDos())
+        mesa.liberar()
+        assert.equals("vacio.png", mesa.imagenComensal(0))
+        assert.equals("vacio.png", mesa.imagenPedido(0))
+    }
+}

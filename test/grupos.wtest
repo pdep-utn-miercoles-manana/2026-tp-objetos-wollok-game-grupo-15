@@ -1,0 +1,76 @@
+import src.estadosEspera.*
+import src.clienteComportamiento.*
+import src.comidasComportamiento.*
+
+describe "Grupo" {
+    const pedidoCarne = new Pedido(comidaPedida = carne)
+    const pedidoCerdo = new Pedido(comidaPedida = cerdo)
+    const grupo = new Grupo(pedidos = [pedidoCarne, pedidoCerdo])
+
+    test "un grupo recién llegado espera en verde" {
+        assert.equals(verde, grupo.estado())
+    }
+
+    test "tiene un pedido pendiente por cada persona" {
+        assert.equals(2, grupo.cantidadPendiente())
+    }
+
+    test "quiere las comidas que alguien de la mesa pidió" {
+        assert.that(grupo.quiere(carne.copiarEn(game.at(0, 0))))
+        assert.that(grupo.quiere(cerdo.copiarEn(game.at(0, 0))))
+    }
+
+    test "no quiere una comida que nadie pidió" {
+        assert.notThat(grupo.quiere(pollo.copiarEn(game.at(0, 0))))
+    }
+
+    test "atender una comida saca ese pedido y devuelve la propina" {
+        const propina = grupo.atender(carne.copiarEn(game.at(0, 0)))
+        assert.equals(verde.propina(), propina)
+        assert.equals(1, grupo.cantidadPendiente())
+        assert.notThat(grupo.quiere(carne.copiarEn(game.at(0, 0))))
+    }
+
+    test "el grupo no está atendido hasta que se entrega todo" {
+        grupo.atender(carne.copiarEn(game.at(0, 0)))
+        assert.notThat(grupo.atendido())
+        grupo.atender(cerdo.copiarEn(game.at(0, 0)))
+        assert.that(grupo.atendido())
+    }
+
+    test "atender una comida que nadie pidió tira error" {
+        assert.throwsExceptionWithMessage("El grupo no pidió esto", { grupo.atender(pollo.copiarEn(game.at(0, 0))) })
+    }
+
+    test "si dos personas pidieron lo mismo, cada entrega atiende a una sola" {
+        const dosCarnes = new Grupo(pedidos = [new Pedido(comidaPedida = carne), new Pedido(comidaPedida = carne)])
+        dosCarnes.atender(carne.copiarEn(game.at(0, 0)))
+        assert.equals(1, dosCarnes.cantidadPendiente())
+        assert.that(dosCarnes.quiere(carne.copiarEn(game.at(0, 0))))
+    }
+
+    test "con el tiempo pasa de verde a amarillo, naranja y rojo" {
+        grupo.esperar()
+        assert.equals(amarillo, grupo.estado())
+        grupo.esperar()
+        assert.equals(naranja, grupo.estado())
+        grupo.esperar()
+        assert.equals(rojo, grupo.estado())
+    }
+
+    test "al llegar a rojo el grupo se va" {
+        3.times({ i => grupo.esperar() })
+        assert.that(grupo.seVa())
+    }
+
+    test "antes de llegar a rojo el grupo no se va" {
+        2.times({ i => grupo.esperar() })
+        assert.notThat(grupo.seVa())
+    }
+
+    test "la propina depende de cuánto esperó el grupo" {
+        grupo.esperar()
+        const propina = grupo.atender(carne.copiarEn(game.at(0, 0)))
+        assert.equals(amarillo.propina(), propina)
+    }
+}

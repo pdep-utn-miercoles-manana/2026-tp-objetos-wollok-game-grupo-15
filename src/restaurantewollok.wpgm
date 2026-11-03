@@ -11,8 +11,9 @@ program juego {
     game.cellSize(50)
     game.boardGround("piso2.png")
 
-    restaurante.iniciar()
     menu.iniciar()
+    restaurante.iniciar()
+    
     game.addVisual(vidas)
     game.addVisual(cartelMonedas)
     jugador.iniciar()

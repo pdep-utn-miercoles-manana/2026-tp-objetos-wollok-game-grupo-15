@@ -10,11 +10,21 @@ class Pedido {
     method satisface(comida) = comida.image() == comidaPedida.image()
 }
 
-class Cliente {
-    const property pedido
+class Grupo {
+    const pedidos
     var estado = verde
+    
+    method imagenComensal() = estado.imagenCliente()
 
     method estado() = estado
+
+    method pedidos() = pedidos
+
+    method cantidadPendiente() = pedidos.size()
+
+    method atendido() = pedidos.isEmpty()
+
+    method quiere(comida) = pedidos.any({ p => p.satisface(comida) })
 
     method esperar() {
         estado = estado.siguiente()
@@ -23,13 +33,13 @@ class Cliente {
     method seVa() = estado.seVa()
 
     method propinaActual() = estado.propina()
-    method quiere(comida) = pedido.satisface(comida)
-    // Devuelve la propina que deja si le sirven lo que pidió.
+
     method atender(comida) {
         if (!self.quiere(comida)) {
-            throw new DomainException(message = "El cliente no pidió esto")
+            throw new DomainException(message = "El grupo no pidió esto")
         }
+        const pedido = pedidos.find({ p => p.satisface(comida) })
+        pedidos.remove(pedido)
         return self.propinaActual()
     }
-    
 }

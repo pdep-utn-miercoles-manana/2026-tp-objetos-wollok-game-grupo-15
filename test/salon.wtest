@@ -3,86 +3,74 @@ import src.clienteComportamiento.*
 import src.restauranteEntorno.*
 import src.comidasComportamiento.*
 
-describe "Cliente" {
-    const cliente = new Cliente(pedido = new Pedido(comidaPedida = carne))
-
-    test "un cliente recién llegado espera en verde" {
-        assert.equals(verde, cliente.estado())
-    }
-
-    test "con el tiempo pasa de verde a amarillo, naranja y rojo" {
-        cliente.esperar()
-        assert.equals(amarillo, cliente.estado())
-        cliente.esperar()
-        assert.equals(naranja, cliente.estado())
-        cliente.esperar()
-        assert.equals(rojo, cliente.estado())
-    }
-
-    test "al llegar a rojo se va" {
-        3.times({ i => cliente.esperar() })
-        assert.that(cliente.seVa())
-    }
-
-    test "antes de llegar a rojo no se va" {
-        2.times({ i => cliente.esperar() })
-        assert.notThat(cliente.seVa())
-    }
-
-    test "la propina baja a medida que espera" {
-        const propinaInicial = cliente.propinaActual()
-        cliente.esperar()
-        assert.that(cliente.propinaActual() < propinaInicial)
-    }
-
-    test "si le sirven lo que pidió, deja la propina de su estado" {
-        const comida = carne.copiarEn(game.at(0, 0))
-        cliente.esperar()
-        assert.equals(amarillo.propina(), cliente.atender(comida))
-    }
-
-    test "si le sirven otra cosa, no acepta" {
-        assert.throwsExceptionWithMessage("El cliente no pidió esto", { cliente.atender(cerdo) })
-    }
-}
-
 describe "Mesa" {
+    const pedidoCarne = new Pedido(comidaPedida = carne)
+    const pedidoCerdo = new Pedido(comidaPedida = cerdo)
     const mesa = new Mesa(position = game.at(0, 0))
-    const cliente = new Cliente(pedido = new Pedido(comidaPedida = carne))
+    const grupoDeUno = new Grupo(pedidos = [pedidoCarne])
+    const grupoDeDos = new Grupo(pedidos = [pedidoCarne, pedidoCerdo])
 
     test "una mesa nueva está libre" {
         assert.notThat(mesa.ocupada())
     }
 
-    test "al sentar un cliente, la mesa queda ocupada" {
-        mesa.sentar(cliente)
+    test "al sentar un grupo, la mesa queda ocupada" {
+        mesa.sentar(grupoDeUno)
         assert.that(mesa.ocupada())
     }
 
-    test "no se puede sentar a un cliente en una mesa ocupada" {
-        mesa.sentar(cliente)
-        assert.throwsExceptionWithMessage("La mesa ya está ocupada", { mesa.sentar(cliente) })
+    test "no se puede sentar un grupo en una mesa ocupada" {
+        mesa.sentar(grupoDeUno)
+        assert.throwsExceptionWithMessage("La mesa ya está ocupada", { mesa.sentar(grupoDeDos) })
     }
 
-    test "servir devuelve la propina y libera la mesa" {
-        mesa.sentar(cliente)
+    test "en la mesa entra un grupo de cuatro personas" {
+        mesa.sentar(new Grupo(pedidos = [pedidoCarne, pedidoCarne, pedidoCarne, pedidoCarne]))
+        assert.that(mesa.ocupada())
+    }
+
+    test "no entra un grupo de más de cuatro personas" {
+        const grupoGrande = new Grupo(pedidos = [pedidoCarne, pedidoCarne, pedidoCarne, pedidoCarne, pedidoCarne])
+        assert.throwsExceptionWithMessage("No entran tantas personas en la mesa", { mesa.sentar(grupoGrande) })
+    }
+
+    test "una mesa libre no quiere ninguna comida" {
+        assert.notThat(mesa.quiere(carne.copiarEn(game.at(0, 0))))
+    }
+
+    test "una mesa ocupada quiere lo que pidió su grupo" {
+        mesa.sentar(grupoDeDos)
+        assert.that(mesa.quiere(carne.copiarEn(game.at(0, 0))))
+        assert.that(mesa.quiere(cerdo.copiarEn(game.at(0, 0))))
+        assert.notThat(mesa.quiere(pollo.copiarEn(game.at(0, 0))))
+    }
+
+    test "servir devuelve la propina y la mesa sigue ocupada si faltan pedidos" {
+        mesa.sentar(grupoDeDos)
         const propina = mesa.servir(carne.copiarEn(game.at(0, 0)))
         assert.equals(verde.propina(), propina)
+        assert.that(mesa.ocupada())
+    }
+
+    test "al servir el último pedido, la mesa se libera" {
+        mesa.sentar(grupoDeDos)
+        mesa.servir(carne.copiarEn(game.at(0, 0)))
+        mesa.servir(cerdo.copiarEn(game.at(0, 0)))
         assert.notThat(mesa.ocupada())
     }
 
     test "no se puede servir en una mesa libre" {
-        assert.throwsExceptionWithMessage("No hay nadie en la mesa", { mesa.servir(carne) })
+        assert.throwsExceptionWithMessage("No hay nadie en la mesa", { mesa.servir(carne.copiarEn(game.at(0, 0))) })
     }
 
-    test "el cliente de una mesa se va cuando se cansa de esperar" {
-        mesa.sentar(cliente)
+    test "el grupo de una mesa se va cuando se cansa de esperar" {
+        mesa.sentar(grupoDeUno)
         3.times({ i => mesa.esperar() })
-        assert.that(mesa.clienteSeFue())
+        assert.that(mesa.grupoSeFue())
     }
 
-    test "una mesa libre no tiene clientes que se hayan ido" {
+    test "una mesa libre no tiene ningún grupo que se haya ido" {
         mesa.esperar()
-        assert.notThat(mesa.clienteSeFue())
+        assert.notThat(mesa.grupoSeFue())
     }
 }

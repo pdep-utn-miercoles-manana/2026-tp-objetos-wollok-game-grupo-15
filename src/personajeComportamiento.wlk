@@ -4,8 +4,8 @@ object jugador {
     var property position = game.at(8, 1) 
     var property image = "jugador.png"
     var property inventarioComidas = []
-    var property limiteActual = 1
-    var property monedas = 10
+    var property monedas = 100
+    var property comidaAgarrada = [] 
 
     method arriba() {
         position = position.up(1)
@@ -24,23 +24,20 @@ object jugador {
     }
 
     method agarrar() {
-         comidas.listaComidas()
+         comidas
         .filter({ c => c.position() == self.position().down(1) })
         .forEach({ c => self.agarrarComida(c) })
     }   
 
     method agarrarComida(comida) {
-        console.println("jeje" + comida.tiempoCoccion().toString())
-        if (inventarioComidas.size() < limiteActual && comida.tiempoCoccion() == 0) {
-            console.println("je")
+        if (inventarioComidas.size() < 4 && comida.tiempoCoccion() == 0) {
             const copia = comida.copiarEn(game.at(20 + inventarioComidas.size(), 4))
             inventarioComidas.add(copia)
             game.addVisual(copia)
+            comida.reiniciarTiempo()
         }
-
     }
 
-    
     method iniciar() {
         game.addVisual(self)
 
@@ -50,6 +47,11 @@ object jugador {
         keyboard.right().onPressDo({ self.derecha() })
         
         keyboard.space().onPressDo({ self.agarrar() })
+
+        keyboard.num1().onPressDo({ self.upgrade(0) })
+        keyboard.num2().onPressDo({ self.upgrade(1) })
+        keyboard.num3().onPressDo({ self.upgrade(2) })
+        keyboard.num4().onPressDo({ self.upgrade(3) })
     }
     method entregar(mesa) {
     if (inventarioComidas.any({ c => mesa.quiere(c) })) {
@@ -70,6 +72,18 @@ object jugador {
         inventarioComidas.forEach({ c => c.position(game.at(20 + inventarioComidas.indexOf(c), 4)) })
     }
 
+    method upgrade(indiceElegido) {
+        const opcionesValidas = (0..3).filter({ i => i != indiceElegido })
+        const random = opcionesValidas.anyOne()
+
+        comidas.get(indiceElegido).bajarTiempo()
+        comidas.get(random).subirTiempo()
+        self.disminuirMonedas(comidas.get(indiceElegido))
+    }
+    
+    method disminuirMonedas(comida){
+        monedas = (monedas - comida.precio().div(2)).max(0)
+    }
 }
 object cartelMonedas {
     const property position = game.at(22, 14)

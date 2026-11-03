@@ -1,6 +1,8 @@
+import src.temporizador.*
 class Comida {
     var property position
     var property tiempoCoccion
+    var property tiempoMaximo = tiempoCoccion
     var property precio
     var property image
     
@@ -12,9 +14,21 @@ class Comida {
             image = image
         )
     }
+    
     method decrementarTiempo() {
         tiempoCoccion = (tiempoCoccion - 1).max(0)
     }
+
+    method bajarTiempo(){
+        tiempoMaximo = (tiempoMaximo - 1).max(1)
+    }
+    method subirTiempo(){
+        tiempoMaximo = tiempoMaximo + 1
+    }
+    method reiniciarTiempo() {
+        tiempoCoccion = tiempoMaximo
+    }
+
 }
 
 const carne = new Comida(
@@ -45,8 +59,4 @@ const manzanaDorada = new Comida(
     image = "manzanadorada.png"
 )
 
-//const comidas = [carne, cerdo, pollo, manzanaDorada]
-
-object comidas {
-    const property listaComidas = [carne, cerdo, pollo, manzanaDorada]
-}
+const comidas = [carne, cerdo, pollo, manzanaDorada]

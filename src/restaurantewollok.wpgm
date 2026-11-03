@@ -3,6 +3,7 @@ import src.restauranteEntorno.*
 import src.personajeComportamiento.*
 import src.menuPartida.*
 import src.vidasComportamiento.*
+import src.temporizador.*
 program juego {
     game.title("Restorante")
     game.width(26)
@@ -15,6 +16,8 @@ program juego {
     game.addVisual(vidas)
     game.addVisual(cartelMonedas)
     jugador.iniciar()
+    temporizador.iniciar()
 
     game.start()
 }
+

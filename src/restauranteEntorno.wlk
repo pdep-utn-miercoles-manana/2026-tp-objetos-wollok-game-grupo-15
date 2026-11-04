@@ -12,6 +12,8 @@ class Mesa {
 
     method capacidad() = 4
 
+    method hitbox() = true
+
     method image() = "mesaGrande.png"
 
     method grupo() = grupo
@@ -68,6 +70,7 @@ class Mesa {
 class Cocina {
     var property position
     method image() = "cocina.png"
+    method hitbox() = true
 }
 
 object restaurante {
@@ -87,6 +90,16 @@ object restaurante {
         game.addVisual(new Cocina(position = game.at(8, 0)))
         game.addVisual(new Cocina(position = game.at(9, 0)))
         game.addVisual(new Cocina(position = game.at(10, 0)))
+
+        game.addVisual(new VacioSolido(position = game.at(4, 4)))
+        game.addVisual(new VacioSolido(position = game.at(4, 5)))
+        game.addVisual(new VacioSolido(position = game.at(13, 4)))
+        game.addVisual(new VacioSolido(position = game.at(13, 5)))
+
+        game.addVisual(new VacioSolido(position = game.at(4, 11)))
+        game.addVisual(new VacioSolido(position = game.at(4, 12)))
+        game.addVisual(new VacioSolido(position = game.at(13, 11)))
+        game.addVisual(new VacioSolido(position = game.at(13, 12)))
 
         game.addVisual(carne)
         game.addVisual(cerdo)

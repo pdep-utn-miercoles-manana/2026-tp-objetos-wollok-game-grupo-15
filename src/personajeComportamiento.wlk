@@ -1,5 +1,8 @@
 import src.comidasComportamiento.*
 import src.vidasComportamiento.*
+import src.visualesSalon.*
+import src.restauranteEntorno.*
+
 
 object jugador {
     var property position = game.at(8, 1) 
@@ -8,20 +11,41 @@ object jugador {
     var property monedas = 100
     var property comidaAgarrada = [] 
 
+    method puedoMoverA(posicionDestino) {
+        const dentroDeRango = posicionDestino.x().between(0, 17) && 
+                              posicionDestino.y().between(0, game.height() - 1)
+                              
+        const haySolido = game.getObjectsIn(posicionDestino).any({ obj => obj.hitbox() })
+
+        return dentroDeRango && !haySolido
+    }
+
     method arriba() {
-        position = position.up(1)
+        const destino = position.up(1)
+        if (self.puedoMoverA(destino)) {
+            position = destino
+        }
     }
 
     method abajo() {
-        position = position.down(1)
+        const destino = position.down(1)
+        if (self.puedoMoverA(destino)) {
+            position = destino
+        }
     }
 
     method izquierda() {
-        position = position.left(1)
+        const destino = position.left(1)
+        if (self.puedoMoverA(destino)) {
+            position = destino
+        }
     }
 
     method derecha() {
-        position = position.right(1)
+        const destino = position.right(1)
+        if (self.puedoMoverA(destino)) {
+            position = destino
+        }
     }
 
     method agarrar() {
@@ -48,12 +72,32 @@ object jugador {
         keyboard.left().onPressDo({ self.izquierda() })
         keyboard.right().onPressDo({ self.derecha() })
         
-        keyboard.space().onPressDo({ self.agarrar() })
-
+        keyboard.space().onPressDo({ self.interactuar() })
+        
         keyboard.num1().onPressDo({ self.upgrade(0) })
         keyboard.num2().onPressDo({ self.upgrade(1) })
         keyboard.num3().onPressDo({ self.upgrade(2) })
         keyboard.num4().onPressDo({ self.upgrade(3) })
+    }
+    method interactuar() {
+        if (self.puedeEntregar() && !inventarioComidas.isEmpty()) {
+            restaurante.entregar()
+        } else {
+            self.agarrar()
+        }
+    }
+
+    method puedeEntregar() {
+        return [
+            game.at(4, 3),
+            game.at(4, 6),
+            game.at(13, 3),
+            game.at(13, 6),
+            game.at(4, 10),
+            game.at(4, 13),
+            game.at(13, 10),
+            game.at(13, 13)
+        ].contains(position)
     }
     method entregar(mesa) {
     if (inventarioComidas.any({ c => mesa.quiere(c) })) {

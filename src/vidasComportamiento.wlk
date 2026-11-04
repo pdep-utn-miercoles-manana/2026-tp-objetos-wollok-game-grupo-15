@@ -1,5 +1,5 @@
 object vidas {
-    var cantidad = 5
+    var cantidad = 3
     const property position = game.at(19, 15)
 
     method cantidad() = cantidad

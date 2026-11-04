@@ -13,6 +13,7 @@ class Pedido {
 class Grupo {
     const pedidos
     var estado = verde
+    var segundosEnEstado = 0
     
     method imagenComensal() = estado.imagenCliente()
 
@@ -26,11 +27,22 @@ class Grupo {
 
     method quiere(comida) = pedidos.any({ p => p.satisface(comida) })
 
+    // Pasó 1 segundo: el grupo cuenta su propio tiempo
     method esperar() {
-        estado = estado.siguiente()
+        segundosEnEstado += 1
+        if (segundosEnEstado >= paciencia.segundosPorEstado() && !estado.seVa()) {
+            self.avanzarEstado()
+        }
     }
 
-    method seVa() = estado.seVa()
+    // Cambia de color y vuelve a contar desde cero
+    method avanzarEstado() {
+        estado = estado.siguiente()
+        segundosEnEstado = 0
+    }
+
+    // Se va cuando está en rojo y ya agotó su tiempo en rojo
+    method seVa() = estado.seVa() && segundosEnEstado >= paciencia.segundosPorEstado()
 
     method propinaActual() = estado.propina()
 

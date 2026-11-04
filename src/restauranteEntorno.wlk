@@ -3,6 +3,8 @@ import src.vidasComportamiento.*
 import src.personajeComportamiento.*
 import src.clienteComportamiento.*
 import src.visualesSalon.*
+import src.temporizador.*
+import src.finPartida.*
 
 class Mesa {
     var property position
@@ -70,10 +72,11 @@ class Cocina {
 
 object restaurante {
     const property mesas = []
-    const intervaloLlegada = 10000   // llega un grupo cada 8 segundos
-    const intervaloEspera = 10000    // cada 8 segundos la paciencia baja un color
+    const intervaloLlegada = 10000   // llega un grupo cada 10 segundos
+    const intervaloEspera = 1000     // cada segundo cada grupo cuenta su propia paciencia
 
     method iniciar() {
+        mesas.clear()
         self.agregarMesa(3, 11, 19, 12)
         self.agregarMesa(3, 4, 19, 8)
         self.agregarMesa(12, 11, 23, 12)
@@ -113,7 +116,6 @@ object restaurante {
         const mesa = libres.anyOne()
         const grupo = self.nuevoGrupo()
         mesa.sentar(grupo)
-        console.println("Grupo de " + grupo.cantidadPendiente().toString() + " en " + mesa.position().toString())
     }
     }
 
@@ -133,9 +135,15 @@ object restaurante {
     method perderVida() {
         vidas.perder()
         if (vidas.agotadas()) {
-            game.say(jugador, "¡Perdiste!")
-            game.schedule(2000, { game.stop() })
+            self.detenerClientes()
+            temporizador.detener()
+            finPartida.perder()
         }
+    }
+
+    method detenerClientes() {
+        game.removeTickEvent("llegadaClientes")
+        game.removeTickEvent("esperaClientes")
     }
 
     // (x, y) es la celda de abajo a la izquierda de la mesa.

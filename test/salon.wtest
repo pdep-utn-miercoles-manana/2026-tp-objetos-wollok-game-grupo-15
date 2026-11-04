@@ -65,7 +65,7 @@ describe "Mesa" {
 
     test "el grupo de una mesa se va cuando se cansa de esperar" {
         mesa.sentar(grupoDeUno)
-        3.times({ i => mesa.esperar() })
+        (4 * paciencia.segundosPorEstado()).times({ i => mesa.esperar() })
         assert.that(mesa.grupoSeFue())
     }
 

@@ -28,3 +28,8 @@ object rojo {
     method seVa() = true
     method imagenCliente() = "cliente_rojo.png"
 }
+
+// Cuántos segundos dura cada color antes de pasar al siguiente.
+object paciencia {
+    method segundosPorEstado() = 6
+}

@@ -1,4 +1,5 @@
 import src.comidasComportamiento.*
+import src.finPartida.*
 
 object temporizador {
     var property tiempoRestante = 180
@@ -34,7 +35,8 @@ object temporizador {
         tiempoRestante = (tiempoRestante - 1).max(0)
         
         if (tiempoRestante == 0) {
-            game.removeTickEvent("cuenta_regresiva_juego")
+            self.detener()
+            finPartida.ganar()
         }
     }
 

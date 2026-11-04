@@ -50,26 +50,34 @@ describe "Grupo" {
     }
 
     test "con el tiempo pasa de verde a amarillo, naranja y rojo" {
-        grupo.esperar()
+        grupo.avanzarEstado()
         assert.equals(amarillo, grupo.estado())
-        grupo.esperar()
+        grupo.avanzarEstado()
         assert.equals(naranja, grupo.estado())
-        grupo.esperar()
+        grupo.avanzarEstado()
         assert.equals(rojo, grupo.estado())
     }
 
+    test "un grupo recién creado sigue verde hasta agotar sus segundos" {
+        (paciencia.segundosPorEstado() - 1).times({ i => grupo.esperar() })
+        assert.equals(verde, grupo.estado())
+        grupo.esperar()
+        assert.equals(amarillo, grupo.estado())
+    }
+
     test "al llegar a rojo el grupo se va" {
-        3.times({ i => grupo.esperar() })
+        3.times({ i => grupo.avanzarEstado() })
+        paciencia.segundosPorEstado().times({ i => grupo.esperar() })
         assert.that(grupo.seVa())
     }
 
     test "antes de llegar a rojo el grupo no se va" {
-        2.times({ i => grupo.esperar() })
+        2.times({ i => grupo.avanzarEstado() })
         assert.notThat(grupo.seVa())
     }
 
     test "la propina depende de cuánto esperó el grupo" {
-        grupo.esperar()
+        grupo.avanzarEstado()
         const propina = grupo.atender(carne.copiarEn(game.at(0, 0)))
         assert.equals(amarillo.propina(), propina)
     }

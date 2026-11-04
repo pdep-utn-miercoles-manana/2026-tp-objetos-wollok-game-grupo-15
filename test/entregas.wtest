@@ -48,7 +48,7 @@ describe "Entregar pedidos" {
 
     test "la propina depende de cuánto esperó el grupo" {
         self.darAlJugador(carne.copiarEn(game.at(20, 4)))
-        grupo.esperar()
+        grupo.avanzarEstado()
         const antes = jugador.monedas()
         jugador.entregar(mesa)
         assert.equals(antes + amarillo.propina(), jugador.monedas())

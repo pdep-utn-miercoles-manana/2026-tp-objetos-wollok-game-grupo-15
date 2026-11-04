@@ -38,8 +38,8 @@ object menuInicio {
         if(!juegoIniciado && image == "menuinicio.png"){
             juegoIniciado = true
             game.removeVisual(self)
-            restaurante.iniciar()
             menu.iniciar()
+            restaurante.iniciar()
             game.addVisual(vidas)
             game.addVisual(cartelMonedas)
             jugador.iniciar()

@@ -2,6 +2,7 @@ import src.temporizador.*
 class Comida {
     var property position
     var property tiempoCoccion
+    const tiempoOriginal = tiempoCoccion
     var property tiempoMaximo = tiempoCoccion
     var property precio
     var property image
@@ -14,15 +15,19 @@ class Comida {
             image = image
         )
     }
-    
+    method reiniciar() {
+        tiempoMaximo = tiempoOriginal
+        tiempoCoccion = tiempoOriginal
+    }
+
     method decrementarTiempo() {
         tiempoCoccion = (tiempoCoccion - 1).max(0)
     }
 
-    method bajarTiempo(){
+    method bajarTiempoUpgrade(){
         tiempoMaximo = (tiempoMaximo - 1).max(1)
     }
-    method subirTiempo(){
+    method subirTiempoDowngrade(){
         tiempoMaximo = tiempoMaximo + 1
     }
     method reiniciarTiempo() {
@@ -47,15 +52,15 @@ const cerdo = new Comida(
 
 const pollo = new Comida(
     position = game.at(9, 0), 
-    tiempoCoccion = 11, 
-    precio = 10,
+    tiempoCoccion = 12, 
+    precio = 12,
     image = "pollo.png"
 )
 
 const manzanaDorada = new Comida(
     position = game.at(10, 0), 
     tiempoCoccion = 15, 
-    precio = 30,
+    precio = 20,
     image = "manzanadorada.png"
 )
 

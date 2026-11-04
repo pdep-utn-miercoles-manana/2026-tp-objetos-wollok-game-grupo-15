@@ -1,6 +1,6 @@
 object vidas {
     var cantidad = 5
-    const property position = game.at(19, 14)
+    const property position = game.at(19, 15)
 
     method cantidad() = cantidad
 
@@ -9,6 +9,9 @@ object vidas {
     }
 
     method agotadas() = cantidad == 0
+    method reiniciarVidas() {
+        cantidad = 5
+    }
 
     // Se muestra como texto en pantalla
     method text() = "Vidas: " + cantidad.toString()

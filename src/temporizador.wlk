@@ -8,11 +8,6 @@ object temporizador {
         self.contadorComidas()
     }
 
-    
-    method ganarJuego() {
-        console.println("terminoooooo")
-        game.clear() 
-    }
 
     method contadorComidas(){
         var i = 0
@@ -27,9 +22,9 @@ object temporizador {
     }
 
     method contadorTiempoJuego(){
-        const textoTiempo = new TextoTiempoJuego(position = game.at(1, 15))
+        const textoTiempo = new TextoTiempoJuego(position = game.at(24, 15))
         game.addVisual(textoTiempo)
-
+        self.reiniciar()
         game.onTick(1000, "cuenta_regresiva_juego", {
             self.descontarSegundo()
         })
@@ -40,8 +35,20 @@ object temporizador {
         
         if (tiempoRestante == 0) {
             game.removeTickEvent("cuenta_regresiva_juego")
-            self.ganarJuego()
         }
+    }
+
+    method detener() {
+        game.removeTickEvent("cuenta_regresiva_juego")
+        var i = 0
+        comidas.forEach({ comida =>
+            game.removeTickEvent("cocinando " + i.toString())
+            i += 1
+        })
+    }
+    method reiniciar() {
+        tiempoRestante = 180
+        comidas.forEach({ comida => comida.reiniciar() })
     }
 
 

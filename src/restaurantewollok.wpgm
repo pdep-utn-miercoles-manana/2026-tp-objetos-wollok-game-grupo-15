@@ -9,16 +9,62 @@ program juego {
     game.width(26)
     game.height(16)
     game.cellSize(50)
-    game.boardGround("piso2.png")
-
-    menu.iniciar()
-    restaurante.iniciar()
-    
-    game.addVisual(vidas)
-    game.addVisual(cartelMonedas)
-    jugador.iniciar()
-    temporizador.iniciar()
+    game.boardGround("piso2.png")   
+    menuInicio.iniciar()
 
     game.start()
 }
 
+object menuInicio {
+    var property position = game.at(0, 0)
+    var property image = "menuinicio.png"
+    var juegoIniciado = false
+
+    method cambiarPantalla(pantalla) {
+        image = pantalla
+    }
+
+    method iniciar() {
+        game.addVisual(self)
+        self.configurarTeclas()
+    }
+    method configurarTeclas() {
+        keyboard.j().onPressDo({ self.comenzarJuego() })
+        keyboard.k().onPressDo({ self.alternarGuia() })
+        keyboard.x().onPressDo({ self.terminarJuego() })
+    }
+
+    method comenzarJuego() {  
+        if(!juegoIniciado && image == "menuinicio.png"){
+            juegoIniciado = true
+            game.removeVisual(self)
+            restaurante.iniciar()
+            menu.iniciar()
+            game.addVisual(vidas)
+            game.addVisual(cartelMonedas)
+            jugador.iniciar()
+            temporizador.iniciar()
+        }
+    }
+    method alternarGuia() {
+        if (!juegoIniciado) {
+            if (image == "menuinicio.png") {
+                image = "menucomojugar.png"
+            } else {
+                image = "menuinicio.png"
+            }
+        }
+    }
+    method terminarJuego() {
+    if (juegoIniciado) {
+        juegoIniciado = false
+        temporizador.detener()
+
+        game.clear()
+
+        image = "menuinicio.png"
+        game.addVisual(self)
+        self.configurarTeclas()
+    }
+}
+}

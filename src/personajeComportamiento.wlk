@@ -1,4 +1,5 @@
 import src.comidasComportamiento.*
+import src.vidasComportamiento.*
 
 object jugador {
     var property position = game.at(8, 1) 
@@ -40,7 +41,8 @@ object jugador {
 
     method iniciar() {
         game.addVisual(self)
-
+        vidas.reiniciarVidas()
+        monedas = 100
         keyboard.up().onPressDo({ self.arriba() })
         keyboard.down().onPressDo({ self.abajo() })
         keyboard.left().onPressDo({ self.izquierda() })
@@ -78,8 +80,8 @@ object jugador {
         const opcionesValidas = (0..3).filter({ i => i != indiceElegido })
         const random = opcionesValidas.anyOne()
 
-        comidas.get(indiceElegido).bajarTiempo()
-        comidas.get(random).subirTiempo()
+        comidas.get(indiceElegido).bajarTiempoUpgrade()
+        comidas.get(random).subirTiempoDowngrade()
         self.disminuirMonedas(comidas.get(indiceElegido))
     }
     
@@ -88,7 +90,7 @@ object jugador {
     }
 }
 object cartelMonedas {
-    const property position = game.at(22, 14)
+    const property position = game.at(21, 15)
     method text() = "Monedas: " + jugador.monedas().toString()
     method textColor() = "FFFFFF"
     }

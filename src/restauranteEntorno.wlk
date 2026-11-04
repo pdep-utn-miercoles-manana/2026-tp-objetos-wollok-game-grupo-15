@@ -118,12 +118,13 @@ object restaurante {
     }
 
     method pasarEspera() {
-    mesas.forEach({ m =>
-        m.esperar()
-        if (m.grupoSeFue()) {
-            m.liberar()
-            self.perderVida()
-        }
+        mesas.forEach({ m =>
+            if (m.grupoSeFue()) {
+                m.liberar()
+                self.perderVida()
+            } else {
+                m.esperar()
+            }
         })
     }
 

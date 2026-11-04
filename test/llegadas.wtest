@@ -44,10 +44,19 @@ describe "Llegada y espera de grupos" {
         assert.equals(1, self.mesasOcupadas())
     }
 
-    test "cuando el grupo se cansa de esperar, la mesa se libera y se pierde una vida" {
+    test "al llegar a rojo el grupo todavía sigue en la mesa y no se perdió ninguna vida" {
         mesa1.sentar(restaurante.nuevoGrupo())
         const vidasAntes = vidas.cantidad()
         3.times({ i => restaurante.pasarEspera() })
+        assert.equals(rojo, mesa1.grupo().estado())
+        assert.that(mesa1.ocupada())
+        assert.equals(vidasAntes, vidas.cantidad())
+    }
+
+    test "si sigue sin ser atendido estando en rojo, el grupo se va y se pierde una vida" {
+        mesa1.sentar(restaurante.nuevoGrupo())
+        const vidasAntes = vidas.cantidad()
+        4.times({ i => restaurante.pasarEspera() })
         assert.notThat(mesa1.ocupada())
         assert.equals(vidasAntes - 1, vidas.cantidad())
     }
